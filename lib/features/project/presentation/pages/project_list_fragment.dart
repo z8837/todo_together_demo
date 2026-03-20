@@ -10,7 +10,6 @@ import 'package:todotogether/app/router.dart';
 import 'package:todotogether/core/ads/native_ad_cache.dart';
 import 'package:todotogether/core/localization/tr_extension.dart';
 import 'package:todotogether/core/network/result/api_error.dart';
-import 'package:todotogether/core/ui/breakpoints.dart';
 import 'package:todotogether/core/ui/app_tokens.dart';
 import 'package:todotogether/core/widgets/app_async_view.dart';
 import 'package:todotogether/core/widgets/bear_native_ad.dart';
@@ -18,7 +17,6 @@ import 'package:todotogether/core/widgets/w_tap.dart';
 import 'package:todotogether/features/project/domain/entities/project_summary.dart';
 import 'package:todotogether/features/project/domain/entities/project_todo.dart';
 import 'package:todotogether/features/project/presentation/pages/create_project_page.dart';
-import 'package:todotogether/features/project/presentation/pages/project_detail/project_detail_screen.dart';
 import 'package:todotogether/features/project/presentation/viewmodels/project_list_fragment_view_model.dart';
 import 'package:todotogether/features/project/presentation/state/project_feature_providers.dart';
 import 'package:todotogether/app/state/sync_coordinator.dart';
@@ -265,42 +263,24 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     return info.uri.path;
   }
 
-  bool _isSplitView(BuildContext context) => AppBreakpoints.isTablet(context);
-
   // 태블릿은 오른쪽 상세 패널 선택 상태만 바꾸고, 모바일은 상세 화면으로 이동합니다.
-  void _handleProjectTap(
+  Future<void> _handleProjectTap(
     BuildContext context,
-    ProjectSummary project, {
-    required bool isSplitView,
-  }) {
-    final changed = _viewModel.handleProjectTap(
-      project,
-      isSplitView: isSplitView,
+    ProjectSummary project,
+  ) async {
+    await context.push<CreateProjectResult>(
+      AppRoutePaths.projectEditor,
+      extra: CreateProjectArgs(initialProject: project, canDelete: true),
     );
-    if (isSplitView) {
-      if (changed && mounted) {
-        setState(() {});
-      }
+
+    if (!mounted) {
       return;
     }
-    context.push(AppRoutePaths.projectDetailPath(project.id));
-  }
 
-  void _ensureSelectedProject(
-    List<ProjectSummary> visibleProjects,
-    bool isSplitView,
-  ) {
-    _viewModel.ensureSelectedProject(
-      visibleProjects: visibleProjects,
-      isSplitView: isSplitView,
-      fallbackFocusTodoId: widget.focusTodoId,
-      mounted: mounted,
-      requestRebuild: () {
-        if (mounted) {
-          setState(() {});
-        }
-      },
-    );
+    ref.invalidate(projectsProvider);
+    ref.invalidate(projectTodosProvider(project.id));
+    ref.invalidate(projectChecklistOrderProvider(project.id));
+    unawaited(ref.read(syncCoordinatorProvider).trigger(SyncReason.userAction));
   }
 
   @override
@@ -310,7 +290,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     final favoriteProjectIds = ref.watch(favoriteProjectIdsProvider);
     final isSyncing = ref.watch(syncInProgressProvider);
     const appBarTitle = _ProjectsAppBarTitle();
-    final isSplitView = _isSplitView(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -343,7 +322,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
           final sortedProjects = displayData.sortedProjects;
           final favoriteProjects = displayData.favoriteProjects;
           final visibleProjects = displayData.visibleProjects;
-          _ensureSelectedProject(visibleProjects, isSplitView);
           final shouldBuildAllProjects = _viewModel.shouldBuildAllProjects;
           if (visibleProjects.isNotEmpty) {
             _syncProjectItemKeys(visibleProjects);
@@ -418,13 +396,10 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
                             favoriteProjectIds.contains(
                               visibleProjects[index].id,
                             ),
-                            isSelected:
-                                visibleProjects[index].id ==
-                                _viewModel.selectedProjectId,
+                            isSelected: false,
                             onTap: () => _handleProjectTap(
                               context,
                               visibleProjects[index],
-                              isSplitView: isSplitView,
                             ),
                           ),
                       ])
@@ -436,13 +411,10 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
                           favoriteProjectIds.contains(
                             visibleProjects[index].id,
                           ),
-                          isSelected:
-                              visibleProjects[index].id ==
-                              _viewModel.selectedProjectId,
+                          isSelected: false,
                           onTap: () => _handleProjectTap(
                             context,
                             visibleProjects[index],
-                            isSplitView: isSplitView,
                           ),
                         ),
                         childCount: visibleProjects.length,
@@ -480,45 +452,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
             ),
           );
 
-          if (!isSplitView) {
-            return listContent;
-          }
-
-          final screenWidth = MediaQuery.sizeOf(context).width;
-          final listWidth = (screenWidth * 0.42).clamp(360.0, 520.0).toDouble();
-          final selectedProjectId = _viewModel.selectedProjectId;
-
-          Widget detailPane;
-          if (selectedProjectId == null) {
-            detailPane = const _ProjectDetailPlaceholder();
-          } else {
-            detailPane = ProjectDetailScreen(
-              projectId: selectedProjectId,
-              focusTodoId: _viewModel.selectedTodoId,
-              embedded: true,
-              onClose: () {
-                if (!mounted) {
-                  return;
-                }
-                final changed = _viewModel.clearSelectedProject();
-                if (changed) {
-                  setState(() {});
-                }
-              },
-            );
-          }
-
-          return Row(
-            children: [
-              SizedBox(width: listWidth, child: listContent),
-              const VerticalDivider(
-                width: 1,
-                thickness: 0.6,
-                color: _ProjectListPalette.divider,
-              ),
-              Expanded(child: detailPane),
-            ],
-          );
+          return listContent;
         },
         loading: () => const _ProjectListSkeletonScreen(),
         errorBuilder: (error, stackTrace) => _ProjectErrorState(
@@ -585,6 +519,7 @@ class _ProjectListSkeletonScreen extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _ProjectDetailPlaceholder extends StatelessWidget {
   const _ProjectDetailPlaceholder();
 
