@@ -27,7 +27,6 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 
 ### 프로젝트 목록
 
-- `todo_together`의 `project_list_fragment` UI/UX를 기준으로 구성
 - 프로젝트 목록 조회
 - 프로젝트 생성 / 수정 / 삭제
 - 즐겨찾기 기반 필터링
@@ -35,7 +34,6 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 
 ### 일정 화면
 
-- `todo_together`의 `schedule_fragment` UI/UX를 기준으로 구성
 - 월간 캘린더와 선택 날짜 일정 목록 표시
 - 일정 완료 상태 변경
 - 일정 숨김 처리
@@ -43,7 +41,6 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 
 ### 프로젝트 생성 / 할 일 추가
 
-- `add_project` 화면 원본 흐름 포팅
 - 일정 화면에서 `todo` 추가 시 프로젝트 선택 화면 연결
 - 프로젝트별 `todo` 생성 / 편집 / 삭제 가능
 - 생성 및 편집 결과가 로컬 DB와 목록 화면에 즉시 반영
@@ -54,10 +51,6 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 - Riverpod provider가 Isar 변화를 구독하며 UI 자동 갱신
 - 사용자의 생성 / 수정 / 상태 변경 후 관련 provider invalidation 및 재동기화 수행
 
-### HomeWidget 예시
-
-- 선택 날짜 기준 일정 데이터를 위젯 모델로 변환
-- 일정 화면에서 선택한 날짜와 일정 데이터를 HomeWidget 서비스로 전달
 
 ## 기술 스택
 
@@ -98,15 +91,6 @@ lib/
     ├── holiday/                    # 공휴일 조회/동기화
     └── home/                       # 메인 탭 화면
 ```
-
-## 핵심 화면
-
-- Mock Login
-- Project List Fragment
-- Schedule Fragment
-- Add Project
-- Add / Edit Todo
-- Project Picker
 
 ## 아키텍처 포인트
 
