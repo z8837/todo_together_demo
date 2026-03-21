@@ -8,7 +8,8 @@ class ScheduleHomeWidgetService {
   const ScheduleHomeWidgetService._();
 
   static const _appGroupId = 'group.kr.co.heeyun.todo_together_demo';
-  static const _selectedDayKey = 'selected_day';
+  static const _appSelectedDayKey = 'app_selected_day';
+  static const _widgetSelectedDayKey = 'widget_selected_day';
   static const _todoPreviewKey = 'todo_preview';
   static const _holidayPreviewKey = 'holiday_preview';
 
@@ -18,10 +19,21 @@ class ScheduleHomeWidgetService {
     } catch (_) {}
   }
 
-  static Future<void> setSelectedDay(DateTime day) async {
+  // 앱 내부 캘린더 상태는 위젯이 읽는 날짜와 분리해 저장합니다.
+  static Future<void> setAppSelectedDay(DateTime day) async {
     try {
       await HomeWidget.saveWidgetData<String>(
-        _selectedDayKey,
+        _appSelectedDayKey,
+        day.toIso8601String(),
+      );
+    } catch (_) {}
+  }
+
+  // 실제 위젯 선택 날짜는 네이티브 위젯 액션에서만 갱신하는 용도입니다.
+  static Future<void> setWidgetSelectedDay(DateTime day) async {
+    try {
+      await HomeWidget.saveWidgetData<String>(
+        _widgetSelectedDayKey,
         day.toIso8601String(),
       );
       await HomeWidget.updateWidget(

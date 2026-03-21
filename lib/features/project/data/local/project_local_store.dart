@@ -25,22 +25,81 @@ class ProjectLocalStore {
     });
   }
 
+  Future<void> upsertDomain(ProjectSummary project) async {
+    await _isar.writeTxn(() async {
+      await _upsertUsersFromDomain(project);
+      await _isar.localProjectEntitys.putByRemoteId(
+        _mapProjectEntityFromDomain(project),
+      );
+    });
+  }
+
+  Future<void> upsertDomains(Iterable<ProjectSummary> projects) async {
+    final values = projects.toList(growable: false);
+    if (values.isEmpty) {
+      return;
+    }
+    await _isar.writeTxn(() async {
+      for (final project in values) {
+        await _upsertUsersFromDomain(project);
+        await _isar.localProjectEntitys.putByRemoteId(
+          _mapProjectEntityFromDomain(project),
+        );
+      }
+    });
+  }
+
+  Future<void> replaceRemoteId({
+    required String currentRemoteId,
+    required ProjectSummary project,
+  }) async {
+    await _isar.writeTxn(() async {
+      await _upsertUsersFromDomain(project);
+      final existing = await _isar.localProjectEntitys
+          .where()
+          .remoteIdEqualTo(currentRemoteId)
+          .findFirst();
+      if (existing == null) {
+        await _isar.localProjectEntitys.putByRemoteId(
+          _mapProjectEntityFromDomain(project),
+        );
+        return;
+      }
+      existing
+        ..remoteId = project.remoteId
+        ..name = project.name
+        ..description = project.description
+        ..version = project.version
+        ..ownerUserId = project.owner.id
+        ..recentUpdateAt = project.recentUpdateAt
+        ..createdAt = project.createdAt
+        ..updatedAt = project.updatedAt
+        ..members = project.members
+            .map(
+              (member) => LocalProjectMemberEmbedded()
+                ..userId = member.id
+                ..role = member.role,
+            )
+            .toList(growable: false);
+      await _isar.localProjectEntitys.put(existing);
+    });
+  }
+
   Future<void> applySync(List<ProjectDto> projects) async {
     await _isar.writeTxn(() async {
-      final projectIds = <String>{};
       for (final dto in projects) {
-        projectIds.add(dto.id);
+        final existing = await _isar.localProjectEntitys
+            .where()
+            .remoteIdEqualTo(dto.id)
+            .findFirst();
+        final remoteUpdatedAt = _parseDateTime(dto.updatedAt);
+        if (existing != null &&
+            remoteUpdatedAt != null &&
+            existing.updatedAt.isAfter(remoteUpdatedAt)) {
+          continue;
+        }
         await _upsertUsers(dto);
         await _isar.localProjectEntitys.putByRemoteId(_mapProjectEntity(dto));
-      }
-
-      final existing = await _isar.localProjectEntitys.where().findAll();
-      final deletedIds = existing
-          .where((entity) => !projectIds.contains(entity.remoteId))
-          .map((entity) => entity.id)
-          .toList(growable: false);
-      if (deletedIds.isNotEmpty) {
-        await _isar.localProjectEntitys.deleteAll(deletedIds);
       }
     });
   }
@@ -107,6 +166,27 @@ class ProjectLocalStore {
     }
   }
 
+  Future<void> _upsertUsersFromDomain(ProjectSummary project) async {
+    await _userStore.upsertUser(
+      UserDto(
+        id: project.owner.id,
+        email: project.owner.email,
+        nickname: project.owner.nickname,
+        provider: project.owner.provider,
+      ),
+    );
+    for (final member in project.members) {
+      await _userStore.upsertUser(
+        UserDto(
+          id: member.id,
+          email: member.email,
+          nickname: member.nickname,
+          provider: member.provider,
+        ),
+      );
+    }
+  }
+
   LocalProjectEntity _mapProjectEntity(ProjectDto dto) {
     return LocalProjectEntity()
       ..remoteId = dto.id
@@ -121,6 +201,25 @@ class ProjectLocalStore {
           .map(
             (member) => LocalProjectMemberEmbedded()
               ..userId = member.user.id
+              ..role = member.role,
+          )
+          .toList(growable: false);
+  }
+
+  LocalProjectEntity _mapProjectEntityFromDomain(ProjectSummary project) {
+    return LocalProjectEntity()
+      ..remoteId = project.remoteId
+      ..name = project.name
+      ..description = project.description
+      ..version = project.version
+      ..ownerUserId = project.owner.id
+      ..recentUpdateAt = project.recentUpdateAt
+      ..createdAt = project.createdAt
+      ..updatedAt = project.updatedAt
+      ..members = project.members
+          .map(
+            (member) => LocalProjectMemberEmbedded()
+              ..userId = member.id
               ..role = member.role,
           )
           .toList(growable: false);

@@ -1,4 +1,6 @@
 class ProjectTodo {
+  static const Object _unset = Object();
+
   const ProjectTodo({
     required this.id,
     required this.projectId,
@@ -44,30 +46,56 @@ class ProjectTodo {
   bool get isCompleted => status.toLowerCase() == 'done' || completedAt != null;
 
   ProjectTodo copyWith({
+    String? id,
+    String? projectId,
+    String? title,
     String? status,
-    DateTime? completedAt,
+    String? kind,
+    int? version,
+    TodoUser? createdBy,
+    bool? isRecurring,
+    bool? isHidden,
+    Object? startDate = _unset,
+    Object? startTime = _unset,
+    Object? weekdayMask = _unset,
+    Object? endDate = _unset,
+    Object? endTime = _unset,
+    Object? alarmOffsetMinutes = _unset,
+    Object? completedAt = _unset,
+    DateTime? createdAt,
     DateTime? updatedAt,
+    List<TodoUser>? assignees,
   }) {
     return ProjectTodo(
-      id: id,
-      projectId: projectId,
-      title: title,
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      title: title ?? this.title,
       status: status ?? this.status,
-      kind: kind,
-      version: version,
-      createdBy: createdBy,
-      isRecurring: isRecurring,
-      isHidden: isHidden,
-      startDate: startDate,
-      startTime: startTime,
-      weekdayMask: weekdayMask,
-      endDate: endDate,
-      endTime: endTime,
-      alarmOffsetMinutes: alarmOffsetMinutes,
-      completedAt: completedAt ?? this.completedAt,
-      createdAt: createdAt,
+      kind: kind ?? this.kind,
+      version: version ?? this.version,
+      createdBy: createdBy ?? this.createdBy,
+      isRecurring: isRecurring ?? this.isRecurring,
+      isHidden: isHidden ?? this.isHidden,
+      startDate: identical(startDate, _unset)
+          ? this.startDate
+          : startDate as DateTime?,
+      startTime: identical(startTime, _unset)
+          ? this.startTime
+          : startTime as String?,
+      weekdayMask: identical(weekdayMask, _unset)
+          ? this.weekdayMask
+          : weekdayMask as int?,
+      endDate: identical(endDate, _unset) ? this.endDate : endDate as DateTime?,
+      endTime: identical(endTime, _unset) ? this.endTime : endTime as String?,
+      alarmOffsetMinutes: identical(alarmOffsetMinutes, _unset)
+          ? this.alarmOffsetMinutes
+          : alarmOffsetMinutes as int?,
+      completedAt: identical(completedAt, _unset)
+          ? this.completedAt
+          : completedAt as DateTime?,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      assignees: assignees,
+      assignees: assignees ?? this.assignees,
     );
   }
 }

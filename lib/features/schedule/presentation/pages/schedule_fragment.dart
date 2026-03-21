@@ -69,6 +69,7 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
   double _pendingPanelPosition = 0.0;
   bool _isDayPanelSnapping = false;
   bool _isCalendarExpanded = false;
+  String? _lastWidgetPreviewSignature;
   DateTime get _focusedMonth => _viewModel.focusedMonth;
   DateTime? get _selectedDay => _viewModel.selectedDay;
   DateTime get _initialMonth => _viewModel.initialMonth;
@@ -94,6 +95,12 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
       } else {
         await coordinator.clearCachedHolidays();
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _persistAppSelectedDay();
     });
   }
 
@@ -214,6 +221,13 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     List<Holiday> holidays,
     Set<String> favoriteProjectIds,
   ) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _syncWidgetPreviewIfNeeded(todos: todos, holidays: holidays);
+    });
+
     final contentData = _viewModel.buildContentData(
       projects: projects,
       todos: todos,
@@ -783,24 +797,62 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     if (changed) {
       setState(() {});
     }
-    _syncSelectedDayToWidget();
+    _persistAppSelectedDay();
   }
 
-  void _syncSelectedDayToWidget() {
+  void _persistAppSelectedDay() {
     final currentSelectedDay =
         _selectedDay ?? DateUtils.dateOnly(DateTime.now());
-    unawaited(ScheduleHomeWidgetService.setSelectedDay(currentSelectedDay));
-    final todos = ref.read(scheduleTodosProvider).valueOrNull;
-    if (todos == null) {
+    unawaited(ScheduleHomeWidgetService.setAppSelectedDay(currentSelectedDay));
+  }
+
+  void _syncWidgetPreviewIfNeeded({
+    required List<ProjectTodo> todos,
+    required List<Holiday> holidays,
+  }) {
+    final signature = _buildWidgetPreviewSignature(
+      todos: todos,
+      holidays: holidays,
+    );
+    if (_lastWidgetPreviewSignature == signature) {
       return;
     }
-    final holidays = _shouldLoadHolidayApi
-        ? (ref.read(holidaysProvider).valueOrNull ?? const <Holiday>[])
-        : const <Holiday>[];
+    _lastWidgetPreviewSignature = signature;
     ScheduleHomeWidgetService.scheduleUpdateFromTodos(
       _mapWidgetTodos(todos),
       holidays: _mapWidgetHolidays(holidays),
     );
+  }
+
+  String _buildWidgetPreviewSignature({
+    required List<ProjectTodo> todos,
+    required List<Holiday> holidays,
+  }) {
+    final buffer = StringBuffer();
+    for (final todo in todos) {
+      buffer
+        ..write(todo.id)
+        ..write('|')
+        ..write(todo.projectId)
+        ..write('|')
+        ..write(todo.status)
+        ..write('|')
+        ..write(todo.isHidden)
+        ..write('|')
+        ..write(todo.updatedAt.toIso8601String())
+        ..write(';');
+    }
+    buffer.write('#');
+    for (final holiday in holidays) {
+      buffer
+        ..write(holiday.date.toIso8601String())
+        ..write('|')
+        ..write(holiday.name)
+        ..write('|')
+        ..write(holiday.isHoliday)
+        ..write(';');
+    }
+    return buffer.toString();
   }
 
   List<ScheduleWidgetTodo> _mapWidgetTodos(List<ProjectTodo> todos) {
@@ -872,7 +924,7 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
   void _jumpToDate(DateTime date) {
     final jumpResult = _viewModel.jumpToDate(date);
     setState(() {});
-    _syncSelectedDayToWidget();
+    _persistAppSelectedDay();
 
     try {
       _monthPageController.animateToPage(

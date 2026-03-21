@@ -25,22 +25,81 @@ class TodoLocalStore {
     });
   }
 
+  Future<void> upsertDomain(ProjectTodo todo) async {
+    await _isar.writeTxn(() async {
+      await _upsertUsersFromDomain(todo);
+      await _isar.localTodoEntitys.putByRemoteId(_mapEntityFromDomain(todo));
+    });
+  }
+
+  Future<void> upsertDomains(Iterable<ProjectTodo> todos) async {
+    final values = todos.toList(growable: false);
+    if (values.isEmpty) {
+      return;
+    }
+    await _isar.writeTxn(() async {
+      for (final todo in values) {
+        await _upsertUsersFromDomain(todo);
+        await _isar.localTodoEntitys.putByRemoteId(_mapEntityFromDomain(todo));
+      }
+    });
+  }
+
+  Future<void> replaceRemoteId({
+    required String currentRemoteId,
+    required ProjectTodo todo,
+  }) async {
+    await _isar.writeTxn(() async {
+      await _upsertUsersFromDomain(todo);
+      final existing = await _isar.localTodoEntitys
+          .where()
+          .remoteIdEqualTo(currentRemoteId)
+          .findFirst();
+      if (existing == null) {
+        await _isar.localTodoEntitys.putByRemoteId(_mapEntityFromDomain(todo));
+        return;
+      }
+      existing
+        ..remoteId = todo.id
+        ..projectId = todo.projectId
+        ..title = todo.title
+        ..status = todo.status
+        ..kind = _normalizeKind(todo.kind)
+        ..version = todo.version
+        ..createdByUserId = todo.createdBy.id
+        ..isRecurring = todo.isRecurring
+        ..isHidden = todo.isHidden
+        ..startDate = todo.startDate
+        ..startTime = todo.startTime
+        ..weekdayMask = todo.weekdayMask
+        ..endDate = todo.endDate
+        ..endTime = todo.endTime
+        ..alarmOffsetMinutes = todo.alarmOffsetMinutes
+        ..completedAt = todo.completedAt
+        ..createdAt = todo.createdAt
+        ..updatedAt = todo.updatedAt
+        ..assigneeIds = todo.assignees
+            .map((assignee) => assignee.id)
+            .toList(growable: false);
+      await _isar.localTodoEntitys.put(existing);
+    });
+  }
+
   Future<void> applySync(List<TodoDto> todos) async {
     await _isar.writeTxn(() async {
-      final todoIds = <String>{};
       for (final dto in todos) {
-        todoIds.add(dto.id);
+        final existing = await _isar.localTodoEntitys
+            .where()
+            .remoteIdEqualTo(dto.id)
+            .findFirst();
+        final remoteUpdatedAt = _parseDateTime(dto.updatedAt);
+        if (existing != null &&
+            remoteUpdatedAt != null &&
+            existing.updatedAt.isAfter(remoteUpdatedAt)) {
+          continue;
+        }
         await _upsertUsers(dto);
         await _isar.localTodoEntitys.putByRemoteId(_mapEntity(dto));
-      }
-
-      final existing = await _isar.localTodoEntitys.where().findAll();
-      final deletedIds = existing
-          .where((entity) => !todoIds.contains(entity.remoteId))
-          .map((entity) => entity.id)
-          .toList(growable: false);
-      if (deletedIds.isNotEmpty) {
-        await _isar.localTodoEntitys.deleteAll(deletedIds);
       }
     });
   }
@@ -87,6 +146,21 @@ class TodoLocalStore {
 
   Future<LocalTodoEntity?> readByRemoteId(String todoId) {
     return _isar.localTodoEntitys.getByRemoteId(todoId);
+  }
+
+  Future<ProjectTodo?> readTodoById(String todoId) async {
+    final entity = await _isar.localTodoEntitys
+        .where()
+        .remoteIdEqualTo(todoId)
+        .findFirst();
+    if (entity == null) {
+      return null;
+    }
+    final userMap = await _userStore.loadUsersByIds({
+      entity.createdByUserId,
+      ...entity.assigneeIds,
+    });
+    return _mapToDomain(entity, userMap);
   }
 
   Future<ProjectTodo?> updateStatusLocal({
@@ -163,6 +237,25 @@ class TodoLocalStore {
     }
   }
 
+  Future<void> _upsertUsersFromDomain(ProjectTodo todo) async {
+    await _userStore.upsertUser(
+      UserDto(
+        id: todo.createdBy.id,
+        email: todo.createdBy.email,
+        nickname: todo.createdBy.nickname,
+      ),
+    );
+    for (final assignee in todo.assignees) {
+      await _userStore.upsertUser(
+        UserDto(
+          id: assignee.id,
+          email: assignee.email,
+          nickname: assignee.nickname,
+        ),
+      );
+    }
+  }
+
   LocalTodoEntity _mapEntity(TodoDto dto) {
     return LocalTodoEntity()
       ..remoteId = dto.id
@@ -184,6 +277,31 @@ class TodoLocalStore {
       ..createdAt = _parseDateTime(dto.createdAt) ?? DateTime.now()
       ..updatedAt = _parseDateTime(dto.updatedAt) ?? DateTime.now()
       ..assigneeIds = dto.assignees.map((assignee) => assignee.id).toList();
+  }
+
+  LocalTodoEntity _mapEntityFromDomain(ProjectTodo todo) {
+    return LocalTodoEntity()
+      ..remoteId = todo.id
+      ..projectId = todo.projectId
+      ..title = todo.title
+      ..status = todo.status
+      ..kind = _normalizeKind(todo.kind)
+      ..version = todo.version
+      ..createdByUserId = todo.createdBy.id
+      ..isRecurring = todo.isRecurring
+      ..isHidden = todo.isHidden
+      ..startDate = todo.startDate
+      ..startTime = todo.startTime
+      ..weekdayMask = todo.weekdayMask
+      ..endDate = todo.endDate
+      ..endTime = todo.endTime
+      ..alarmOffsetMinutes = todo.alarmOffsetMinutes
+      ..completedAt = todo.completedAt
+      ..createdAt = todo.createdAt
+      ..updatedAt = todo.updatedAt
+      ..assigneeIds = todo.assignees
+          .map((assignee) => assignee.id)
+          .toList(growable: false);
   }
 
   ProjectTodo _mapToDomain(
