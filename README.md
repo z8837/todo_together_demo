@@ -1,7 +1,5 @@
 # Todo Together Demo
 
-Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flutter 포트폴리오 데모
-
 ![Flutter](https://img.shields.io/badge/Flutter-3.35+-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.10-0175C2?logo=dart&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/State-Riverpod-6A5AE0)
