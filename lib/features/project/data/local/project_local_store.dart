@@ -18,13 +18,6 @@ class ProjectLocalStore {
   final Isar _isar;
   final LocalUserStore _userStore;
 
-  Future<void> upsert(ProjectDto dto) async {
-    await _isar.writeTxn(() async {
-      await _upsertUsers(dto);
-      await _isar.localProjectEntitys.putByRemoteId(_mapProjectEntity(dto));
-    });
-  }
-
   Future<void> upsertDomain(ProjectSummary project) async {
     await _isar.writeTxn(() async {
       await _upsertUsersFromDomain(project);
@@ -160,9 +153,9 @@ class ProjectLocalStore {
   }
 
   Future<void> _upsertUsers(ProjectDto dto) async {
-    await _userStore.upsertUser(_mapOwnerToUser(dto.owner));
+    await _userStore.upsertUser(_mapProjectUser(dto.owner));
     for (final member in dto.membership) {
-      await _userStore.upsertUser(_mapMemberUserToUser(member.user));
+      await _userStore.upsertUser(_mapProjectUser(member.user));
     }
   }
 
@@ -304,21 +297,12 @@ class ProjectLocalStore {
     return DateTime.tryParse(raw);
   }
 
-  UserDto _mapOwnerToUser(ProjectUserDto owner) {
+  UserDto _mapProjectUser(ProjectUserDto user) {
     return UserDto(
-      id: owner.id,
-      email: owner.email,
-      nickname: owner.nickname,
-      provider: owner.provider,
-    );
-  }
-
-  UserDto _mapMemberUserToUser(ProjectUserDto member) {
-    return UserDto(
-      id: member.id,
-      email: member.email,
-      nickname: member.nickname,
-      provider: member.provider,
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      provider: user.provider,
     );
   }
 }

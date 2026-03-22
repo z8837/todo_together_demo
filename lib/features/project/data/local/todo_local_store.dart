@@ -18,13 +18,6 @@ class TodoLocalStore {
   final Isar _isar;
   final LocalUserStore _userStore;
 
-  Future<void> upsert(TodoDto dto) async {
-    await _isar.writeTxn(() async {
-      await _upsertUsers(dto);
-      await _isar.localTodoEntitys.putByRemoteId(_mapEntity(dto));
-    });
-  }
-
   Future<void> upsertDomain(ProjectTodo todo) async {
     await _isar.writeTxn(() async {
       await _upsertUsersFromDomain(todo);
@@ -144,10 +137,6 @@ class TodoLocalStore {
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
-  Future<LocalTodoEntity?> readByRemoteId(String todoId) {
-    return _isar.localTodoEntitys.getByRemoteId(todoId);
-  }
-
   Future<ProjectTodo?> readTodoById(String todoId) async {
     final entity = await _isar.localTodoEntitys
         .where()
@@ -161,60 +150,6 @@ class TodoLocalStore {
       ...entity.assigneeIds,
     });
     return _mapToDomain(entity, userMap);
-  }
-
-  Future<ProjectTodo?> updateStatusLocal({
-    required String todoId,
-    required String nextStatus,
-  }) async {
-    final entity = await _isar.localTodoEntitys
-        .where()
-        .remoteIdEqualTo(todoId)
-        .findFirst();
-    if (entity == null) {
-      return null;
-    }
-    entity.status = nextStatus;
-    entity.completedAt = nextStatus == 'done' ? DateTime.now() : null;
-    entity.updatedAt = DateTime.now();
-    await _isar.writeTxn(() async {
-      await _isar.localTodoEntitys.put(entity);
-    });
-    final userMap = await _userStore.loadUsersByIds({
-      entity.createdByUserId,
-      ...entity.assigneeIds,
-    });
-    return _mapToDomain(entity, userMap);
-  }
-
-  Future<ProjectTodo?> updateVisibilityLocal({
-    required String todoId,
-    required bool isHidden,
-  }) async {
-    final entity = await _isar.localTodoEntitys
-        .where()
-        .remoteIdEqualTo(todoId)
-        .findFirst();
-    if (entity == null) {
-      return null;
-    }
-    entity.isHidden = isHidden;
-    entity.updatedAt = DateTime.now();
-    await _isar.writeTxn(() async {
-      await _isar.localTodoEntitys.put(entity);
-    });
-    final userMap = await _userStore.loadUsersByIds({
-      entity.createdByUserId,
-      ...entity.assigneeIds,
-    });
-    return _mapToDomain(entity, userMap);
-  }
-
-  Future<void> updateHidden({
-    required String todoId,
-    required bool isHidden,
-  }) async {
-    await updateVisibilityLocal(todoId: todoId, isHidden: isHidden);
   }
 
   Stream<List<ProjectTodo>> watchTodos({String? projectId}) {
@@ -233,7 +168,7 @@ class TodoLocalStore {
   Future<void> _upsertUsers(TodoDto dto) async {
     await _userStore.upsertUser(_mapTodoUser(dto.createdBy));
     for (final assignee in dto.assignees) {
-      await _userStore.upsertUser(_mapAssignee(assignee));
+      await _userStore.upsertUser(_mapTodoUser(assignee));
     }
   }
 
@@ -404,10 +339,6 @@ class TodoLocalStore {
   }
 
   UserDto _mapTodoUser(TodoUserDto dto) {
-    return UserDto(id: dto.id, email: dto.email, nickname: dto.nickname);
-  }
-
-  UserDto _mapAssignee(TodoUserDto dto) {
     return UserDto(id: dto.id, email: dto.email, nickname: dto.nickname);
   }
 }

@@ -80,4 +80,95 @@ void main() {
       expect(entering.enteredProjectTab, isTrue);
     });
   });
+
+  group('ProjectTodoSummaryViewModel', () {
+    test(
+      'buildTodoStatus splits overdue, in progress, upcoming, completed',
+      () {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final overdue = demoTodo(
+          id: 'overdue',
+          title: 'Overdue',
+          kind: 'schedule',
+          status: 'todo',
+          startDate: today.subtract(const Duration(days: 1)),
+          endDate: today.subtract(const Duration(days: 1)),
+          endTime: '23:59:00',
+        );
+        final inProgress = demoTodo(
+          id: 'in-progress',
+          title: 'In Progress',
+          kind: 'schedule',
+          status: 'doing',
+          startDate: today,
+          startTime: '00:00:00',
+          endDate: today,
+          endTime: '23:59:00',
+        );
+        final upcoming = demoTodo(
+          id: 'upcoming',
+          title: 'Upcoming',
+          kind: 'schedule',
+          status: 'todo',
+          startDate: today.add(const Duration(days: 1)),
+          endDate: today.add(const Duration(days: 1)),
+        );
+        final completed = demoTodo(
+          id: 'completed',
+          title: 'Completed',
+          kind: 'schedule',
+          status: 'done',
+          completedAt: now.subtract(const Duration(hours: 1)),
+        );
+
+        final summary = ProjectTodoSummaryViewModel.buildTodoStatus([
+          overdue,
+          inProgress,
+          upcoming,
+          completed,
+        ]);
+
+        expect(summary.overdue, 1);
+        expect(summary.inProgress, 1);
+        expect(summary.upcoming, 1);
+        expect(summary.completed, 1);
+      },
+    );
+
+    test(
+      'resolveChecklistPreviewTodos keeps explicit order for active items',
+      () {
+        final todo = demoTodo(
+          id: 'todo',
+          title: 'Todo',
+          kind: 'checklist',
+          status: 'todo',
+          createdAt: DateTime(2026, 3, 10, 9),
+        );
+        final doing = demoTodo(
+          id: 'doing',
+          title: 'Doing',
+          kind: 'checklist',
+          status: 'doing',
+          createdAt: DateTime(2026, 3, 10, 10),
+        );
+        final done = demoTodo(
+          id: 'done',
+          title: 'Done',
+          kind: 'checklist',
+          status: 'done',
+          completedAt: DateTime(2026, 3, 10, 11),
+        );
+
+        final preview =
+            ProjectTodoSummaryViewModel.resolveChecklistPreviewTodos(
+              [todo, doing, done],
+              orderIds: const ['doing', 'todo'],
+            );
+
+        expect(preview.map((item) => item.id), ['doing', 'todo', 'done']);
+      },
+    );
+  });
 }

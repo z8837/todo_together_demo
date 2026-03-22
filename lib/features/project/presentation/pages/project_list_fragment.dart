@@ -12,7 +12,6 @@ import 'package:todotogether/core/localization/tr_extension.dart';
 import 'package:todotogether/core/network/result/api_error.dart';
 import 'package:todotogether/core/ui/app_tokens.dart';
 import 'package:todotogether/core/widgets/app_async_view.dart';
-import 'package:todotogether/core/widgets/bear_native_ad.dart';
 import 'package:todotogether/core/widgets/w_tap.dart';
 import 'package:todotogether/features/project/domain/entities/project_summary.dart';
 import 'package:todotogether/features/project/domain/entities/project_todo.dart';
@@ -43,9 +42,6 @@ extension _ProjectListViewModeX on _ProjectListViewMode {
     return _ProjectListViewMode.detail;
   }
 }
-
-/// [중요] 프로젝트 탭의 메인 목록 화면입니다.
-/// 탭 진입 시 목록을 보여주고, 태블릿에서는 상세 패널과 분할 화면으로 동작합니다.
 class ProjectListFragment extends ConsumerStatefulWidget {
   const ProjectListFragment({super.key, this.focusProjectId, this.focusTodoId});
 
@@ -66,7 +62,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
   late final ProjectListFragmentViewModel _viewModel;
 
   @override
-  /// [중요] 화면 초기 상태를 복원하고, 외부에서 넘어온 포커스 프로젝트를 준비합니다.
+
   void initState() {
     super.initState();
     _refreshController = RefreshController();
@@ -115,7 +111,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     );
   }
 
-  /// [중요] 당겨서 새로고침 시 프로젝트와 할 일을 함께 동기화합니다.
   Future<void> _handleRefresh() async {
     final isSuccess = await _viewModel.handleRefresh(
       syncProjects: () async {
@@ -170,7 +165,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     _viewModel.syncProjectItemKeys(_projectItemKeys, projects);
   }
 
-  /// [중요] 포커스 ID가 로컬 ID로 들어온 경우 원격 ID로 변환해 실제 목록 매칭을 보장합니다.
+
   Future<void> _resolveFocusProjectId(List<ProjectSummary> projects) async {
     final changed = await _viewModel.resolveFocusProjectId(
       projects,
@@ -182,7 +177,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     }
   }
 
-  /// [중요] 특정 프로젝트 카드 위치로 자동 스크롤해 사용자를 바로 목적지로 이동시킵니다.
+
   void _scrollToFocusedProject(List<ProjectSummary> projects) {
     _viewModel.scrollToFocusedProject(
       projects: projects,
@@ -225,7 +220,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     }
   }
 
-  /// [중요] 프로젝트 탭 진입/이탈 이벤트를 감지해 네이티브 광고 프리패치를 관리합니다.
+
   void _attachRouteListener() {
     if (!mounted) {
       return;
@@ -284,7 +279,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
   }
 
   @override
-  /// [중요] 목록 정렬/필터/포커스 이동/분할 화면 선택을 한 사이클에서 구성합니다.
   Widget build(BuildContext context) {
     final projectsAsync = ref.watch(projectsProvider);
     final favoriteProjectIds = ref.watch(favoriteProjectIdsProvider);

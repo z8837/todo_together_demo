@@ -42,8 +42,6 @@ final _scheduleFragmentViewModelProvider =
       );
     });
 
-/// [중요] 일정 탭 메인 화면입니다.
-/// 월간 캘린더 + 선택 날짜 패널을 결합해 할 일을 확인/수정합니다.
 class ScheduleFragment extends ConsumerStatefulWidget {
   const ScheduleFragment({super.key});
 
@@ -76,11 +74,9 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
   int get _currentPageIndex => _viewModel.currentPageIndex;
   bool get _showFavoritesOnly => _viewModel.showFavoritesOnly;
 
-  // 한국 로케일일 때만 공휴일 API를 로딩해 불필요한 네트워크 호출을 줄입니다.
   bool get _shouldLoadHolidayApi => _viewModel.shouldLoadHolidayApi;
 
   @override
-  /// [중요] 오늘 날짜를 기본 선택으로 잡고, 월 페이지/즐겨찾기 필터 상태를 복원합니다.
   void initState() {
     super.initState();
     _viewModel = ref.read(
@@ -89,7 +85,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     _monthPageController = PageController(initialPage: _currentPageIndex);
     Future.microtask(() async {
       final coordinator = ref.read(holidaySyncCoordinatorProvider);
-      // 로케일에 따라 공휴일 동기화 또는 캐시 정리를 분기합니다.
       if (_shouldLoadHolidayApi) {
         await coordinator.ensureHolidaysSynced();
       } else {
@@ -105,7 +100,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
   }
 
   @override
-  // 화면 종료 시 컨트롤러와 노티파이어를 정리합니다.
   void dispose() {
     _monthPageController.dispose();
     _dayPanelListScrollable.dispose();
@@ -113,7 +107,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     super.dispose();
   }
 
-  /// [중요] 하단 일정 패널 위치 변경 요청을 프레임 단위로 합쳐 과도한 애니메이션 호출을 방지합니다.
   void _requestPanelPosition(double position) {
     if (_isDayPanelSnapping) {
       return;
@@ -146,7 +139,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     setState(() {});
   }
 
-  /// [중요] 홈 위젯 딥링크(action/date)로 진입했을 때 목표 날짜 이동과 작성 플로우를 실행합니다.
   void _handleWidgetRouteParams(BuildContext context) {
     final queryParameters = GoRouterState.of(context).uri.queryParameters;
     final routeAction = _viewModel.resolveWidgetRouteAction(
@@ -173,7 +165,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
   }
 
   @override
-  /// [중요] 프로젝트/할 일/공휴일 비동기 상태를 결합해 캘린더 본문을 렌더링합니다.
   Widget build(BuildContext context) {
     _handleWidgetRouteParams(context);
     final projectsAsync = ref.watch(projectsProvider);
@@ -920,7 +911,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     );
   }
 
-  /// [중요] 선택 날짜를 바꾸면서 필요한 경우 월 페이지도 함께 이동시킵니다.
   void _jumpToDate(DateTime date) {
     final jumpResult = _viewModel.jumpToDate(date);
     setState(() {});
