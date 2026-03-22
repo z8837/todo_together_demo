@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:todotogether/features/auth/presentation/pages/login_screen.dart';
 
 void main() {
-  testWidgets('로그인 화면의 핵심 안내 문구가 보인다', (tester) async {
+  testWidgets('로그인 화면', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: LoginScreen())),
     );
