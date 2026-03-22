@@ -10,10 +10,6 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 
 ## 소개
 
-`todo_together_demo`는 실제 스토어 배포 앱 `todo_together`에서 공개 가능한 범위만 분리해 만든 데모 프로젝트입니다.
-
-단순히 화면만 복제한 포트폴리오가 아니라, 아래 흐름이 실제로 작동하도록 구성했습니다.
-
 - Flutter feature-first 폴더 구조
 - Riverpod 기반 상태 관리
 - Isar 로컬 저장
@@ -69,7 +65,7 @@ Todo Together의 핵심 UX와 앱 아키텍처를 공개용으로 정리한 Flut
 
 ```text
 lib/
-├── app/                            # 앱 부트스트랩, 라우터, 전역 sync 상태
+├── app/                            # 라우터, 전역 sync 상태
 │   ├── bootstrap.dart
 │   ├── router.dart
 │   └── state/
@@ -88,8 +84,8 @@ lib/
     │   ├── domain/
     │   └── presentation/
     ├── schedule/                   # 캘린더, 날짜별 일정, 일정 액션
-    ├── holiday/                    # 공휴일 조회/동기화
-    └── home/                       # 메인 탭 화면
+    ├── holiday/                    
+    └── home/                       
 ```
 
 ## 아키텍처 포인트
