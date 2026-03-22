@@ -350,15 +350,7 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                child: BearNativeAdCard(
-                  key: const ValueKey('project-list-native-ad'),
-                  placement: NativeAdPlacement.projectList,
-                ),
-              ),
-            ),
+
             if (showEmptySkeleton)
               const _ProjectListSkeletonSliver()
             else if (showFavoriteEmpty)

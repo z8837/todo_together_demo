@@ -24,33 +24,14 @@ class LoginScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Todo Together Demo 로그인',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
+
                     const SizedBox(height: 12),
                     Text(
-                      '로그인은 mock 처리만 남기고, 실제 소셜 로그인과 외부 인증은 제외했습니다.',
+                      '실제 소셜 로그인과 외부 인증은 제외했습니다.',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Text(
-                        '보여주는 항목\n'
-                        '- Riverpod 상태관리\n'
-                        '- GoRouter 라우팅\n'
-                        '- Isar 로컬 저장\n'
-                        '- Dio/Retrofit 네트워크 계층\n'
-                        '- local-first sync\n'
-                        '- HomeWidget 연동 예시',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
@@ -61,7 +42,7 @@ class LoginScreen extends ConsumerWidget {
                                     .read(authControllerProvider.notifier)
                                     .mockLogin();
                               },
-                        child: Text(loading ? '로그인 중...' : '모의 로그인'),
+                        child: Text(loading ? '로그인 중...' : '로그인'),
                       ),
                     ),
                     if (state.message != null) ...[
