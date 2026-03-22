@@ -19,7 +19,6 @@ class ScheduleHomeWidgetService {
     } catch (_) {}
   }
 
-  // 앱 내부 캘린더 상태는 위젯이 읽는 날짜와 분리해 저장합니다.
   static Future<void> setAppSelectedDay(DateTime day) async {
     try {
       await HomeWidget.saveWidgetData<String>(
@@ -29,7 +28,6 @@ class ScheduleHomeWidgetService {
     } catch (_) {}
   }
 
-  // 실제 위젯 선택 날짜는 네이티브 위젯 액션에서만 갱신하는 용도입니다.
   static Future<void> setWidgetSelectedDay(DateTime day) async {
     try {
       await HomeWidget.saveWidgetData<String>(

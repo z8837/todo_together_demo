@@ -95,7 +95,6 @@ class ScheduleAddTodoFlow {
     if (created == true) {
       if (context.mounted) {
         //         ScaffoldMessenger.of(context).showSnackBar(
-        //           SnackBar(content: Text('"${project.name}"에 TODO를 추가했어요.')),
         //         );
       }
     }

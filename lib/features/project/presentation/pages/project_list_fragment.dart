@@ -23,7 +23,6 @@ import 'package:todotogether/core/ui/app_spacing.dart';
 
 enum _ProjectListViewMode { detail, simple }
 
-// 목록 카드 표현 방식을 "간단/상세"로 전환할 때 쓰는 변환 유틸입니다.
 extension _ProjectListViewModeX on _ProjectListViewMode {
   String get storageValue =>
       this == _ProjectListViewMode.simple ? 'simple' : 'detail';
@@ -42,6 +41,7 @@ extension _ProjectListViewModeX on _ProjectListViewMode {
     return _ProjectListViewMode.detail;
   }
 }
+
 class ProjectListFragment extends ConsumerStatefulWidget {
   const ProjectListFragment({super.key, this.focusProjectId, this.focusTodoId});
 
@@ -62,7 +62,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
   late final ProjectListFragmentViewModel _viewModel;
 
   @override
-
   void initState() {
     super.initState();
     _refreshController = RefreshController();
@@ -90,7 +89,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
   }
 
   @override
-  // 라우트/구독/스크롤 컨트롤러를 해제해 메모리 누수를 방지합니다.
   void dispose() {
     _routeInfoProvider?.removeListener(_handleRouteChange);
     _projectFocusSubscription?.close();
@@ -100,7 +98,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
   }
 
   @override
-  // 부모가 전달한 포커스 대상이 바뀌면 내부 선택 상태를 맞춥니다.
   void didUpdateWidget(ProjectListFragment oldWidget) {
     super.didUpdateWidget(oldWidget);
     _viewModel.applyWidgetUpdate(
@@ -130,7 +127,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     }
   }
 
-  // 목록 아이템마다 키를 유지해 "해당 카드로 스크롤"이 안정적으로 동작하게 만듭니다.
   Widget _buildProjectListItem(
     ProjectSummary project,
     int index,
@@ -165,7 +161,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     _viewModel.syncProjectItemKeys(_projectItemKeys, projects);
   }
 
-
   Future<void> _resolveFocusProjectId(List<ProjectSummary> projects) async {
     final changed = await _viewModel.resolveFocusProjectId(
       projects,
@@ -176,7 +171,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
       setState(() {});
     }
   }
-
 
   void _scrollToFocusedProject(List<ProjectSummary> projects) {
     _viewModel.scrollToFocusedProject(
@@ -193,7 +187,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     );
   }
 
-  // 카드 표현 모드 변경 후 사용자 선호를 로컬 저장소에 유지합니다.
   void _handleViewModeChange(_ProjectListViewMode mode) {
     final changed = _viewModel.updateViewModeStorage(mode.storageValue);
     if (!changed) {
@@ -219,7 +212,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
       setState(() {});
     }
   }
-
 
   void _attachRouteListener() {
     if (!mounted) {
@@ -258,7 +250,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
     return info.uri.path;
   }
 
-  // 태블릿은 오른쪽 상세 패널 선택 상태만 바꾸고, 모바일은 상세 화면으로 이동합니다.
   Future<void> _handleProjectTap(
     BuildContext context,
     ProjectSummary project,
@@ -320,7 +311,6 @@ class _ProjectListFragmentState extends ConsumerState<ProjectListFragment> {
           if (visibleProjects.isNotEmpty) {
             _syncProjectItemKeys(visibleProjects);
             unawaited(_resolveFocusProjectId(visibleProjects));
-            // 빌드 이후 목표 카드로 자동 스크롤을 시도합니다.
             _scrollToFocusedProject(visibleProjects);
           }
 

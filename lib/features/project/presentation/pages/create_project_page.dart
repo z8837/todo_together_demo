@@ -136,7 +136,6 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
         return GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Scaffold(
-            // 🔥 키보드에 맞춰 body 영역만 줄어들게 (Scaffold가 알아서 처리)
             resizeToAvoidBottomInset: true,
             backgroundColor: _CreateProjectPalette.background,
             appBar: AppBar(
@@ -192,7 +191,6 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
                             textInputAction: TextInputAction.newline,
                           ),
 
-                          // 수정 화면에서는 팀원 목록/초대 기능을 숨깁니다.
                           if (_viewModel.errorMessage != null) ...[
                             AppGap.h12,
                             Text(
@@ -250,7 +248,6 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
                           ],
                           AppGap.h24,
 
-                          // 🔥 키보드가 올라왔을 때만, 스크롤 맨 아래에 버튼 표시
                           if (isKeyboardVisible) ...[
                             AppGap.h16,
                             _buildActionButtons(canDeleteProject),
@@ -264,7 +261,6 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
               ),
             ),
 
-            // 🔥 키보드가 없을 때만, 항상 하단 고정 버튼
             bottomNavigationBar: isKeyboardVisible
                 ? null
                 : SafeArea(

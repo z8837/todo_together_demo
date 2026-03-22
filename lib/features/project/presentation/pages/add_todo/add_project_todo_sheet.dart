@@ -634,7 +634,6 @@ class _AddProjectTodoSheetState extends ConsumerState<AddProjectTodoSheet> {
               backgroundColor: Colors.white,
               headerBackgroundColor: Colors.white,
               headerForegroundColor: Colors.black,
-              // // 선택된 날짜 동그라미 색 등
               // dayBackgroundColor: WidgetStatePropertyAll(AppTokens.todoRecurring),
               // dayForegroundColor: WidgetStatePropertyAll(Colors.white),
             ),
@@ -765,11 +764,11 @@ class _AddProjectTodoSheetState extends ConsumerState<AddProjectTodoSheet> {
       initialMinutes = maxMinutes;
     }
 
-    int periodIndex = initialMinutes >= 12 * 60 ? 1 : 0; // 0=무기한??, 1=무기한??
+    int periodIndex = initialMinutes >= 12 * 60 ? 1 : 0;
     int hour12 = (initialMinutes ~/ 60) % 12;
     if (hour12 == 0) hour12 = 12;
 
-    int selectedPeriod = periodIndex; // 0=무기한??, 1=무기한??
+    int selectedPeriod = periodIndex;
     int selectedHour12 = hour12; // 1..12
     int selectedMinute =
         ((initialMinutes % 60) ~/ minuteInterval) * minuteInterval;
@@ -834,8 +833,8 @@ class _AddProjectTodoSheetState extends ConsumerState<AddProjectTodoSheet> {
     }
 
     TimeOfDay toTimeOfDay() {
-      final h = selectedHour12 % 12; // 12 -> 0 무기한무기한
-      final hour24 = selectedPeriod == 0 ? h : h + 12; // 무기한??/무기한?? 무기한무기한
+      final h = selectedHour12 % 12;
+      final hour24 = selectedPeriod == 0 ? h : h + 12;
       return TimeOfDay(hour: hour24, minute: selectedMinute);
     }
 
@@ -1291,7 +1290,6 @@ class _AddProjectTodoSheetState extends ConsumerState<AddProjectTodoSheet> {
 
     if (result.isSuccess) {
       //       messenger.showSnackBar(
-      //         const SnackBar(content: Text('일정을 삭제했어요.'.tr())),
       //       );
       navigator.pop(true);
     } else {
@@ -1913,7 +1911,6 @@ class _InputTile extends StatelessWidget {
               height: icon != null ? 0 : 45,
             ),
 
-            // ✅ label: Expanded -> Flexible (텍스트는 필요만큼만, 넘치면 말줄임)
             Expanded(
               child: Text(
                 label,
@@ -1929,10 +1926,9 @@ class _InputTile extends StatelessWidget {
               ),
             ),
 
-            // ✅ trailing: 남은 공간 전부 차지 + 오른쪽 정렬 + 영역 전체 탭 가능
             if (trailing != null)
               GestureDetector(
-                behavior: HitTestBehavior.opaque, // ✅ 빈 공간도 탭 잡기
+                behavior: HitTestBehavior.opaque,
                 onTap: onTrailingTap,
                 child: SizedBox(
                   height: 40,

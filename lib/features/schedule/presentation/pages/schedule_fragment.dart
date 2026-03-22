@@ -247,12 +247,10 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
       if (project == null) {
         if (context.mounted) {
           //           ScaffoldMessenger.of(context).showSnackBar(
-          //             const SnackBar(content: Text('프로젝트 정보를 불러오지 못했어요.'.tr())),
           //           );
         }
         return;
       }
-      // 카드 액션(완료/수정/숨김 등)은 공통 바텀시트 핸들러로 위임합니다.
       await _openTodoActions(
         context: context,
         project: project,
@@ -879,7 +877,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
         .toList(growable: false);
   }
 
-  // 달력에서 날짜 직접 선택 다이얼로그를 열고 결과 날짜로 점프합니다.
   Future<void> _pickCalendarDate(BuildContext context) async {
     final initial = _selectedDay ?? DateUtils.dateOnly(DateTime.now());
     final selected = await _pickDate(context, initial);
@@ -950,7 +947,6 @@ class _ScheduleFragmentState extends ConsumerState<ScheduleFragment> {
     );
   }
 
-  // PageView의 인덱스를 실제 년/월로 환산해 포커스 월 상태를 동기화합니다.
   void _handlePageChanged(int pageIndex) {
     final changed = _viewModel.updatePageIndex(pageIndex);
     if (!changed) {

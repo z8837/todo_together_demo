@@ -196,7 +196,6 @@ class _DayScheduleCardState extends State<_DayScheduleCard> {
               ),
             ),
             Expanded(
-              //스와이프 할 곳
               child: PageView.builder(
                 controller: _pageController,
                 physics: const BouncingScrollPhysics(),
