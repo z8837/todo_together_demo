@@ -101,28 +101,15 @@
 │     │     ├─ viewmodels/
 │     │     │  └─ add_todo/
 │     │     └─ widgets/
-│     ├─ schedule/
-│     │  ├─ application/
-│     │  │  └─ home_widget/       # 위젯 연동용 상태/브리지
-│     │  ├─ di/
-│     │  ├─ domain/
-│     │  │  └─ usecases/
-│     │  └─ presentation/
-│     │     ├─ pages/
-│     │     └─ viewmodels/
-│     └─ workspace/
+│     └─ schedule/
 │        ├─ application/
-│        ├─ data/
-│        │  ├─ datasources/
-│        │  ├─ models/
-│        │  └─ repositories/
+│        │  └─ home_widget/       # 위젯 연동용 상태/브리지
+│        ├─ di/
 │        ├─ domain/
-│        │  ├─ entities/
-│        │  ├─ repositories/
 │        │  └─ usecases/
 │        └─ presentation/
 │           ├─ pages/
-│           └─ widgets/
+│           └─ viewmodels/
 ├─ test/
 │  ├─ test_helpers/               # fixture, fake repository
 │  ├─ unit/                       # viewmodel / pure logic 테스트
