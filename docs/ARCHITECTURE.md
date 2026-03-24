@@ -33,7 +33,6 @@
 - `data/local/local_db.dart`: Isar 초기화와 테스트 환경 분기를 담당합니다.
 - `data/local/entities/*`: 프로젝트와 할 일 로컬 엔티티를 둡니다.
 - `network/demo_http_client_adapter.dart`: Retrofit이 호출할 더미 API 응답을 제공합니다.
-- `widgets/schedule_home_widget_service.dart`: 선택 날짜 일정 정보를 HomeWidget으로 내보냅니다.
 
 ### features/auth
 - `application/state/auth_controller.dart`: mock 로그인과 인증 상태를 관리합니다.
@@ -49,6 +48,7 @@
 ### features/schedule
 - `domain/usecases/schedule_use_cases.dart`: 일정 완료 상태 변경을 제공합니다.
 - `application/schedule_providers.dart`: 일정 관련 provider를 모읍니다.
+- `application/home_widget/*`: 일정 위젯용 데이터 모델과 HomeWidget 연동을 담당합니다.
 - `presentation/pages/schedule_fragment.dart`: 월간 캘린더와 날짜별 일정 패널을 보여줍니다.
 
 ## 핵심 흐름
