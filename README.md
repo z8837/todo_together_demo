@@ -43,8 +43,6 @@
 ├─ .github/
 │  └─ workflows/
 │     └─ flutter-tests.yml        # analyze / test / integration_test CI
-├─ docs/
-│  └─ TESTING.md                  # 테스트 전략 및 수동 체크리스트
 ├─ integration_test/
 │  └─ app_flow_test.dart          # 통합 테스트
 ├─ lib/
@@ -54,7 +52,6 @@
 │  │  ├─ router.dart
 │  │  └─ state/                   # 앱 전역 sync, 앱 상태 조정
 │  ├─ core/
-│  │  ├─ ads/                     # 광고 캐시
 │  │  ├─ data/
 │  │  │  ├─ local/
 │  │  │  │  └─ entities/          # Isar 엔티티
