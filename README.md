@@ -142,7 +142,6 @@
 - `test/unit`: 순수 로직 테스트
 - `test/widget`: 위젯 단위 테스트
 - `integration_test`: 사용자 흐름 기반 통합 테스트
-- 공통 fixture와 fake repository는 `test/test_helpers`에 둡니다.
 
 ## 테스트 / CI
 
