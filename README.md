@@ -8,43 +8,19 @@
 
 ## 소개
 
-- Flutter feature-first 폴더 구조
-- Riverpod 기반 상태 관리
-- Isar 로컬 저장
-- Dio/Retrofit 네트워크 계층
-- local-first sync 흐름
-- HomeWidget 연동 예시
+`Todo Together Demo`는 Flutter 기반의 feature-first 구조, Riverpod 상태 관리, Isar 로컬 DB, Dio/Retrofit 네트워크 계층, local-first 동기화 흐름을 보여주기 위한 데모 프로젝트입니다.
 
-로그인은 mock으로 처리했고, 소셜 로그인과 실제 운영 서버 연동은 제외했습니다. 대신 더미 API 응답과 로컬 데이터 동기화 흐름을 남겨서 앱 구조와 설계 의도를 바로 보여줄 수 있게 했습니다.
+로그인은 mock 방식으로 처리하고, 화면은 로컬 DB를 중심으로 갱신됩니다. 네트워크 계층은 `DemoHttpClientAdapter`를 통해 데모 응답을 반환하도록 구성되어 있습니다.
 
 ## 주요 기능
 
-### 프로젝트 목록
-
 - 프로젝트 목록 조회
 - 프로젝트 생성 / 수정 / 삭제
-- 즐겨찾기 기반 필터링
-- 프로젝트 상세 진입 흐름 연결
-
-### 일정 화면
-
-- 월간 캘린더와 선택 날짜 일정 목록 표시
-- 일정 완료 상태 변경
-- 일정 숨김 처리
-- 일정 추가 / 수정 흐름 연결
-
-### 프로젝트 생성 / 할 일 추가
-
-- 일정 화면에서 `todo` 추가 시 프로젝트 선택 화면 연결
-- 프로젝트별 `todo` 생성 / 편집 / 삭제 가능
-- 생성 및 편집 결과가 로컬 DB와 목록 화면에 즉시 반영
-
-### 로컬 우선 동기화
-
-- 더미 API 응답을 받아 Isar에 먼저 저장
-- Riverpod provider가 Isar 변화를 구독하며 UI 자동 갱신
-- 사용자의 생성 / 수정 / 상태 변경 후 관련 provider invalidation 및 재동기화 수행
-
+- 즐겨찾기 필터
+- 캘린더 기반 일정 화면
+- 일정 생성 / 수정 / 완료 / 숨김
+- local-first sync
+- Home Widget 연동 예시
 
 ## 기술 스택
 
@@ -53,63 +29,141 @@
 | Language | Dart 3.10.7 |
 | UI | Flutter |
 | State Management | flutter_riverpod 2.6.1 |
-| Navigation | go_router 16.2.1 |
+| Navigation | go_router |
 | Local Database | isar_community 3.3.0 |
-| Network | dio 5.9.0 + retrofit 4.6.0 |
+| Network | dio + retrofit |
 | Code Generation | build_runner, json_serializable, retrofit_generator, isar_community_generator |
-| Widget Integration | home_widget 0.9.0 |
+| Widget Integration | home_widget |
+| Test | flutter_test, integration_test |
 
 ## 프로젝트 구조
 
 ```text
-lib/
-├── app/                            # 라우터, 전역 sync 상태
-│   ├── bootstrap.dart
-│   ├── router.dart
-│   └── state/
-├── core/                           # 공통 네트워크, 로컬 DB, UI 토큰, 위젯 서비스
-│   ├── data/
-│   │   └── local/
-│   │       ├── entities/
-│   │       └── local_db.dart
-│   ├── network/
-│   └── widgets/
-└── features/
-    ├── auth/                       # mock 로그인
-    ├── project/                    # 프로젝트 목록, 생성, 할 일 생성/편집
-    │   ├── application/
-    │   ├── data/
-    │   ├── domain/
-    │   └── presentation/
-    ├── schedule/                   # 캘린더, 날짜별 일정, 일정 액션
-    ├── holiday/                    
-    └── home/                       
+.
+├─ .github/
+│  └─ workflows/
+│     └─ flutter-tests.yml        # analyze / test / integration_test CI
+├─ docs/
+│  └─ TESTING.md                  # 테스트 전략 및 수동 체크리스트
+├─ integration_test/
+│  └─ app_flow_test.dart          # 통합 테스트
+├─ lib/
+│  ├─ main.dart
+│  ├─ app/
+│  │  ├─ bootstrap.dart
+│  │  ├─ router.dart
+│  │  └─ state/                   # 앱 전역 sync, 앱 상태 조정
+│  ├─ core/
+│  │  ├─ ads/                     # 광고 캐시
+│  │  ├─ data/
+│  │  │  ├─ local/
+│  │  │  │  └─ entities/          # Isar 엔티티
+│  │  │  └─ models/               # 공용 DTO / 모델
+│  │  ├─ localization/            # tr() 확장 등
+│  │  ├─ network/
+│  │  │  └─ result/               # ApiError, Result 타입
+│  │  ├─ preferences/             # UI preference 저장
+│  │  ├─ theme/
+│  │  ├─ ui/                      # 토큰, spacing, system UI
+│  │  ├─ utils/
+│  │  └─ widgets/                 # 공용 위젯, dialog, home widget service
+│  └─ features/
+│     ├─ auth/
+│     │  ├─ application/
+│     │  ├─ data/
+│     │  ├─ di/
+│     │  ├─ domain/
+│     │  └─ presentation/
+│     ├─ holiday/
+│     │  ├─ application/
+│     │  ├─ data/
+│     │  ├─ di/
+│     │  ├─ domain/
+│     │  └─ presentation/
+│     ├─ home/
+│     │  └─ presentation/         # 메인 shell 진입 화면
+│     ├─ project/
+│     │  ├─ application/
+│     │  │  └─ state/
+│     │  ├─ data/
+│     │  │  ├─ datasources/       # Retrofit API, adapter 연동
+│     │  │  ├─ local/             # project/todo 로컬 스토어
+│     │  │  │  └─ entities/
+│     │  │  ├─ models/
+│     │  │  └─ repositories/
+│     │  ├─ di/
+│     │  ├─ domain/
+│     │  │  ├─ entities/
+│     │  │  ├─ repositories/
+│     │  │  └─ usecases/
+│     │  └─ presentation/
+│     │     ├─ pages/
+│     │     │  ├─ add_todo/
+│     │     │  └─ project_detail/
+│     │     ├─ state/
+│     │     ├─ viewmodels/
+│     │     │  └─ add_todo/
+│     │     └─ widgets/
+│     ├─ schedule/
+│     │  ├─ application/
+│     │  │  └─ home_widget/       # 위젯 연동용 상태/브리지
+│     │  ├─ di/
+│     │  ├─ domain/
+│     │  │  └─ usecases/
+│     │  └─ presentation/
+│     │     ├─ pages/
+│     │     └─ viewmodels/
+│     └─ workspace/
+│        ├─ application/
+│        ├─ data/
+│        │  ├─ datasources/
+│        │  ├─ models/
+│        │  └─ repositories/
+│        ├─ domain/
+│        │  ├─ entities/
+│        │  ├─ repositories/
+│        │  └─ usecases/
+│        └─ presentation/
+│           ├─ pages/
+│           └─ widgets/
+├─ test/
+│  ├─ test_helpers/               # fixture, fake repository
+│  ├─ unit/                       # viewmodel / pure logic 테스트
+│  ├─ widget/                     # 위젯 테스트
+│  └─ widget_test.dart            # 로그인 화면 스모크 테스트
+├─ pubspec.yaml
+└─ pubspec.lock
 ```
 
-## 아키텍처 포인트
+## 구조 설명
 
-### 1. feature-first + 계층 분리
+### app
 
-- `features/project`, `features/schedule` 단위로 관심사를 나눴습니다.
-- 각 feature는 `application / data / domain / presentation` 구조를 유지합니다.
+- 앱 전역 bootstrap, router, sync coordinator를 둡니다.
+- feature 바깥에서 공통으로 쓰는 앱 레벨 흐름을 담당합니다.
 
-### 2. Isar 기반 로컬 저장
+### core
 
-- 프로젝트, 할 일, 사용자 엔티티를 Isar에 저장합니다.
-- 로컬 스토어가 entity와 도메인 모델 사이 매핑 및 upsert를 담당합니다.
+- 공통 인프라 레이어입니다.
+- 로컬 DB, 네트워크 공통 타입, UI 토큰, preference, 공용 위젯이 들어 있습니다.
 
-### 3. Dio / Retrofit 네트워크 계층
+### features
 
-- API 선언은 Retrofit 인터페이스로 분리했습니다.
-- 실제 데모 환경에서는 `DemoHttpClientAdapter`가 더미 응답을 반환합니다.
+- 기능 기준으로 분리된 feature-first 구조입니다.
+- 주요 feature는 `auth`, `project`, `schedule`, `holiday`, `workspace`, `home` 입니다.
+- 각 feature는 필요에 따라 `application / data / di / domain / presentation` 구조를 가집니다.
 
-### 4. local-first sync
+### test / integration_test
 
-- 서버 응답을 받은 뒤 Isar에 반영하고, 화면은 Isar watch 스트림을 통해 갱신됩니다.
-- 프로젝트 생성, 일정 생성/편집, 완료 처리 이후 관련 목록이 즉시 반영됩니다.
+- `test/unit`: 순수 로직 테스트
+- `test/widget`: 위젯 단위 테스트
+- `integration_test`: 사용자 흐름 기반 통합 테스트
+- 공통 fixture와 fake repository는 `test/test_helpers`에 둡니다.
 
-### 5. 라우팅과 상태 흐름 유지
+## 테스트 / CI
 
-- `GoRouter`의 `StatefulShellRoute`로 프로젝트 / 일정 2개 탭을 구성했습니다.
-- 일정 화면에서 `todo` 추가 시 프로젝트 선택, 새 프로젝트 생성, 다시 일정 생성으로 이어지는 흐름을 유지했습니다.
-
+- CI 워크플로: `.github/workflows/flutter-tests.yml`
+- 자동 실행:
+  - `flutter analyze`
+  - `flutter test`
+  - `flutter test integration_test -d windows`
