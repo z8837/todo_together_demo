@@ -1,18 +1,18 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'todo_dto.g.dart';
+
+@JsonSerializable()
 class TodoSyncResponseDto {
   const TodoSyncResponseDto({required this.todos});
 
   final List<TodoDto> todos;
 
-  factory TodoSyncResponseDto.fromJson(Map<String, dynamic> json) {
-    final raw = json['todos'] as List<dynamic>? ?? const [];
-    return TodoSyncResponseDto(
-      todos: raw
-          .map((item) => TodoDto.fromJson(item as Map<String, dynamic>))
-          .toList(growable: false),
-    );
-  }
+  factory TodoSyncResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$TodoSyncResponseDtoFromJson(json);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class TodoDto {
   const TodoDto({
     required this.id,
@@ -56,36 +56,11 @@ class TodoDto {
   final String createdAt;
   final String updatedAt;
 
-  factory TodoDto.fromJson(Map<String, dynamic> json) {
-    final assigneeRaw = json['assignees'] as List<dynamic>? ?? const [];
-    return TodoDto(
-      id: json['id'] as String,
-      project: json['project'] as String,
-      title: json['title'] as String,
-      status: json['status'] as String,
-      kind: json['kind'] as String,
-      version: json['version'] as int,
-      createdBy: TodoUserDto.fromJson(
-        json['created_by'] as Map<String, dynamic>,
-      ),
-      assignees: assigneeRaw
-          .map((item) => TodoUserDto.fromJson(item as Map<String, dynamic>))
-          .toList(growable: false),
-      isRecurring: json['is_recurring'] as bool? ?? false,
-      isHidden: json['is_hidden'] as bool? ?? false,
-      startDate: json['start_date'] as String?,
-      startTime: json['start_time'] as String?,
-      weekdayMask: json['weekday_mask'] as int?,
-      endDate: json['end_date'] as String?,
-      endTime: json['end_time'] as String?,
-      alarmOffsetMinutes: json['alarm_offset_minutes'] as int?,
-      completedAt: json['completed_at'] as String?,
-      createdAt: json['created_at'] as String,
-      updatedAt: json['updated_at'] as String,
-    );
-  }
+  factory TodoDto.fromJson(Map<String, dynamic> json) =>
+      _$TodoDtoFromJson(json);
 }
 
+@JsonSerializable()
 class TodoUserDto {
   const TodoUserDto({
     required this.id,
@@ -97,11 +72,6 @@ class TodoUserDto {
   final String email;
   final String nickname;
 
-  factory TodoUserDto.fromJson(Map<String, dynamic> json) {
-    return TodoUserDto(
-      id: json['id'] as int,
-      email: json['email'] as String,
-      nickname: json['nickname'] as String,
-    );
-  }
+  factory TodoUserDto.fromJson(Map<String, dynamic> json) =>
+      _$TodoUserDtoFromJson(json);
 }

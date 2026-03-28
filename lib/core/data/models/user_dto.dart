@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user_dto.g.dart';
+
+@JsonSerializable()
 class UserDto {
   const UserDto({
     required this.id,
@@ -11,21 +16,8 @@ class UserDto {
   final String nickname;
   final String? provider;
 
-  factory UserDto.fromJson(Map<String, dynamic> json) {
-    return UserDto(
-      id: json['id'] as int,
-      email: json['email'] as String? ?? '',
-      nickname: json['nickname'] as String? ?? '',
-      provider: json['provider'] as String?,
-    );
-  }
+  factory UserDto.fromJson(Map<String, dynamic> json) =>
+      _$UserDtoFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'nickname': nickname,
-      'provider': provider,
-    };
-  }
+  Map<String, dynamic> toJson() => _$UserDtoToJson(this);
 }

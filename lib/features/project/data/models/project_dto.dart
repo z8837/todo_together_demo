@@ -1,18 +1,18 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'project_dto.g.dart';
+
+@JsonSerializable()
 class ProjectSyncResponseDto {
   const ProjectSyncResponseDto({required this.projects});
 
   final List<ProjectDto> projects;
 
-  factory ProjectSyncResponseDto.fromJson(Map<String, dynamic> json) {
-    final raw = json['projects'] as List<dynamic>? ?? const [];
-    return ProjectSyncResponseDto(
-      projects: raw
-          .map((item) => ProjectDto.fromJson(item as Map<String, dynamic>))
-          .toList(growable: false),
-    );
-  }
+  factory ProjectSyncResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$ProjectSyncResponseDtoFromJson(json);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class ProjectDto {
   const ProjectDto({
     required this.id,
@@ -36,41 +36,22 @@ class ProjectDto {
   final String updatedAt;
   final String? recentUpdateAt;
 
-  factory ProjectDto.fromJson(Map<String, dynamic> json) {
-    final members = json['membership'] as List<dynamic>? ?? const [];
-    return ProjectDto(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: (json['description'] as String?) ?? '',
-      version: json['version'] as int,
-      owner: ProjectUserDto.fromJson(json['owner'] as Map<String, dynamic>),
-      membership: members
-          .map(
-            (item) =>
-                ProjectMembershipDto.fromJson(item as Map<String, dynamic>),
-          )
-          .toList(growable: false),
-      createdAt: json['created_at'] as String,
-      updatedAt: json['updated_at'] as String,
-      recentUpdateAt: json['recent_update_at'] as String?,
-    );
-  }
+  factory ProjectDto.fromJson(Map<String, dynamic> json) =>
+      _$ProjectDtoFromJson(json);
 }
 
+@JsonSerializable()
 class ProjectMembershipDto {
   const ProjectMembershipDto({required this.user, required this.role});
 
   final ProjectUserDto user;
   final String role;
 
-  factory ProjectMembershipDto.fromJson(Map<String, dynamic> json) {
-    return ProjectMembershipDto(
-      user: ProjectUserDto.fromJson(json['user'] as Map<String, dynamic>),
-      role: json['role'] as String,
-    );
-  }
+  factory ProjectMembershipDto.fromJson(Map<String, dynamic> json) =>
+      _$ProjectMembershipDtoFromJson(json);
 }
 
+@JsonSerializable()
 class ProjectUserDto {
   const ProjectUserDto({
     required this.id,
@@ -84,12 +65,6 @@ class ProjectUserDto {
   final String nickname;
   final String? provider;
 
-  factory ProjectUserDto.fromJson(Map<String, dynamic> json) {
-    return ProjectUserDto(
-      id: json['id'] as int,
-      email: json['email'] as String,
-      nickname: json['nickname'] as String,
-      provider: json['provider'] as String?,
-    );
-  }
+  factory ProjectUserDto.fromJson(Map<String, dynamic> json) =>
+      _$ProjectUserDtoFromJson(json);
 }
