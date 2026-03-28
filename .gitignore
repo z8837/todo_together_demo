@@ -27,3 +27,6 @@ doc/api/
 
 # Local testing guide
 docs/TESTING.md
+
+# Claude Code
+.claude/
