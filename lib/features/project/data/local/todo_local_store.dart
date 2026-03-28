@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:isar_community/isar.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/data/local/entities/local_todo_entity.dart';
 import '../../../../core/data/local/entities/local_user_entity.dart';
@@ -287,36 +286,9 @@ class TodoLocalStore {
     required Stream<void> todoChanges,
     required Future<List<ProjectTodo>> Function() loader,
   }) {
-    late final StreamController<List<ProjectTodo>> controller;
-    StreamSubscription<void>? todoSub;
-    StreamSubscription<void>? userSub;
-
-    Future<void> emit() async {
-      try {
-        final todos = await loader();
-        if (!controller.isClosed) {
-          controller.add(todos);
-        }
-      } catch (error, stackTrace) {
-        if (!controller.isClosed) {
-          controller.addError(error, stackTrace);
-        }
-      }
-    }
-
-    controller = StreamController<List<ProjectTodo>>(
-      onListen: () {
-        emit();
-        todoSub = todoChanges.listen((_) => emit());
-        userSub = _isar.localUserEntitys.watchLazy().listen((_) => emit());
-      },
-      onCancel: () async {
-        await todoSub?.cancel();
-        await userSub?.cancel();
-      },
-    );
-
-    return controller.stream;
+    return Rx.merge([todoChanges, _isar.localUserEntitys.watchLazy()])
+        .startWith(null)
+        .asyncMap((_) => loader());
   }
 
   DateTime? _parseDate(String? raw) {

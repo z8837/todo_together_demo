@@ -26,6 +26,7 @@ dependencies:
   pull_to_refresh: ^2.0.0
   skeletonizer: ^2.1.1
   sliding_up_panel: ^2.0.0+1
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:

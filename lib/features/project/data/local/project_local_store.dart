@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:isar_community/isar.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/data/local/entities/local_project_entity.dart';
 import '../../../../core/data/local/entities/local_user_entity.dart';
@@ -258,36 +257,9 @@ class ProjectLocalStore {
   }
 
   Stream<List<ProjectSummary>> _projectStream(Stream<void> projectChanges) {
-    late final StreamController<List<ProjectSummary>> controller;
-    StreamSubscription<void>? projectSub;
-    StreamSubscription<void>? userSub;
-
-    Future<void> emit() async {
-      try {
-        final projects = await readAll();
-        if (!controller.isClosed) {
-          controller.add(projects);
-        }
-      } catch (error, stackTrace) {
-        if (!controller.isClosed) {
-          controller.addError(error, stackTrace);
-        }
-      }
-    }
-
-    controller = StreamController<List<ProjectSummary>>(
-      onListen: () {
-        emit();
-        projectSub = projectChanges.listen((_) => emit());
-        userSub = _isar.localUserEntitys.watchLazy().listen((_) => emit());
-      },
-      onCancel: () async {
-        await projectSub?.cancel();
-        await userSub?.cancel();
-      },
-    );
-
-    return controller.stream;
+    return Rx.merge([projectChanges, _isar.localUserEntitys.watchLazy()])
+        .startWith(null)
+        .asyncMap((_) => readAll());
   }
 
   DateTime? _parseDateTime(String? raw) {
